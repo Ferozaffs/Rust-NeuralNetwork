@@ -2,5 +2,5 @@ FROM rust
 
 COPY . .
 
-RUN ["cargo", "test"]
+CMD ["cargo", "test"]
 
