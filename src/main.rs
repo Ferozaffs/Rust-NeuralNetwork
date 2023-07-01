@@ -40,3 +40,4 @@ fn main() {
         println!("{} Avg.cost\n", avg_cost);
     }
 }
+

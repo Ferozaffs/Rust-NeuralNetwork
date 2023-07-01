@@ -152,3 +152,53 @@ pub fn create_neural_net(num_inputs: usize, num_outputs: usize, num_layers: usiz
 
 	return net;
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+	use nalgebra::dvector;
+    #[test]
+    fn init_test() {
+        let net = create_neural_net(3,3,5,5);
+        assert_eq!(net.num_inputs, 3);
+        assert_eq!(net.num_outputs, 3);
+        assert_eq!(net.layers.len(), 6);
+        assert_eq!(net.accumelated_cost, 0.0);
+        assert_eq!(net.accumelated_guesses, DVector::zeros(3));
+        assert_eq!(net.num_calcs, 0);
+    }
+
+	#[test]
+	fn feed_forward_test() {
+		let mut net = create_neural_net(3,3,5,5);
+		let input = DVector::identity(3);
+		let outputs = net.feed_forward(&input);
+		assert_eq!(outputs.len(), 3);
+	}
+
+	#[test]
+	fn train_test() {
+		let mut net = create_neural_net(3,3,5,5);
+		let input = DVector::identity(3);
+		let first: nalgebra::Matrix<f32, nalgebra::Dyn, nalgebra::Const<1>, nalgebra::VecStorage<f32, nalgebra::Dyn, nalgebra::Const<1>>> = net.feed_forward(&input);
+		
+		let mut cost = 0.0;
+		if first[0] > first[1] && first[0] > first[2]{
+			cost += net.calculate_cost(&first, &dvector![1.0, 0.0, 0.0]);
+		}
+		else if first[1] > first[0] && first[1] > first[2]{
+			cost += net.calculate_cost(&first, &dvector![0.0, 1.0, 0.0]);
+		}
+		else{
+			cost += net.calculate_cost(&first, &dvector![0.0, 0.0, 1.0]);
+		}		
+
+		let learning_rate_max = 0.1;
+		let learning_rate_min = 0.01;
+		net.train(learning_rate_min + cost * (learning_rate_max - learning_rate_min));
+	
+		let second: nalgebra::Matrix<f32, nalgebra::Dyn, nalgebra::Const<1>, nalgebra::VecStorage<f32, nalgebra::Dyn, nalgebra::Const<1>>> = net.feed_forward(&input);
+
+		assert_ne!(first, second);
+	}
+}
