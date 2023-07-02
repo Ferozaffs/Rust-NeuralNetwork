@@ -181,21 +181,8 @@ mod tests {
 		let mut net = create_neural_net(3,3,5,5);
 		let input = DVector::identity(3);
 		let first: nalgebra::Matrix<f32, nalgebra::Dyn, nalgebra::Const<1>, nalgebra::VecStorage<f32, nalgebra::Dyn, nalgebra::Const<1>>> = net.feed_forward(&input);
-		
-		let mut cost = 0.0;
-		if first[0] > first[1] && first[0] > first[2]{
-			cost += net.calculate_cost(&first, &dvector![1.0, 0.0, 0.0]);
-		}
-		else if first[1] > first[0] && first[1] > first[2]{
-			cost += net.calculate_cost(&first, &dvector![0.0, 1.0, 0.0]);
-		}
-		else{
-			cost += net.calculate_cost(&first, &dvector![0.0, 0.0, 1.0]);
-		}		
 
-		let learning_rate_max = 0.1;
-		let learning_rate_min = 0.01;
-		net.train(learning_rate_min + cost * (learning_rate_max - learning_rate_min));
+		net.train(0.5);
 	
 		let second: nalgebra::Matrix<f32, nalgebra::Dyn, nalgebra::Const<1>, nalgebra::VecStorage<f32, nalgebra::Dyn, nalgebra::Const<1>>> = net.feed_forward(&input);
 

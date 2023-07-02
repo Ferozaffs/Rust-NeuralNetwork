@@ -107,3 +107,38 @@ pub fn get_cost(neural_net: &mut NeuralNet, outputs: DVector<f32>) -> f32 {
     }	
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+	#[test]
+	fn cost_test() {
+		let mut net = neural_nets::create_neural_net(3,3,5,5);
+
+        let mut rng = rand::thread_rng();
+        let dist = rand::distributions::Standard;
+
+        let input = DVector::from_distribution(3, &dist, &mut rng);
+		let outputs: nalgebra::Matrix<f32, nalgebra::Dyn, nalgebra::Const<1>, nalgebra::VecStorage<f32, nalgebra::Dyn, nalgebra::Const<1>>> = net.feed_forward(&input);
+        let original_cost = get_cost(&mut net, outputs);
+
+        let mut cost: f32 = 0.0;
+        
+        for _test in 0..100 {
+            let input = DVector::from_distribution(3, &dist, &mut rng);
+            let outputs = net.feed_forward(&input);
+            
+            cost += get_cost(&mut net, outputs);	
+        }
+        
+        let learning_rate_max = 0.1;
+        let learning_rate_min = 0.01;
+        let avg_cost = cost / 100 as f32;
+        net.train(learning_rate_min + avg_cost * (learning_rate_max - learning_rate_min));
+        
+		let outputs: nalgebra::Matrix<f32, nalgebra::Dyn, nalgebra::Const<1>, nalgebra::VecStorage<f32, nalgebra::Dyn, nalgebra::Const<1>>> = net.feed_forward(&input);
+        let trained_cost = get_cost(&mut net, outputs);
+
+		assert!(original_cost > trained_cost);
+	}
+}
+
