@@ -1,4 +1,5 @@
 use nalgebra::{DMatrix, DVector};
+use serde::{Serialize, Deserialize};
 
 pub fn sigmoid(value: f32) -> f32{
 	return 1.0 / (1.0 + libm::expf(-value));
@@ -11,7 +12,7 @@ pub fn disigmoid(value: f32) -> f32{
 pub fn to_open(value: f32) -> f32{
 	return value * 2.0 - 1.0;
 }
-
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Layer{
 	layer_weights: DMatrix<f32>,
 	layer_bias: DVector<f32>,
@@ -36,7 +37,7 @@ pub fn create_layer(num_inputs: usize, num_nodes: usize) -> Layer {
 	return layer;
 }	
 
-
+#[derive(Serialize, Deserialize, Debug)]
 pub struct NeuralNet{
     num_inputs: usize,
 	num_outputs: usize,
@@ -78,15 +79,14 @@ impl NeuralNet {
 	
 		
 		let mut cost = 0.0;
+		let delta = previous_output - correct_output;
 
-		for n in 0..previous_output.data.len() {
-			cost += libm::powf(previous_output[n], 2.0);
+		for n in 0..delta.data.len() {
+			cost += libm::powf(delta[n], 2.0);
 		}
 
 		self.accumelated_cost += cost;
-
-		let delta = previous_output - correct_output;
-		self.accumelated_guesses += delta;
+		self.accumelated_guesses += correct_output;
 
 		return cost;
 	}
